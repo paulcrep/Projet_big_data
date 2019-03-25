@@ -98,7 +98,7 @@ def main():
 	# Création d'une classe twitter client
     api = TwitterClient()
 	# On appelle une fonction pour récupérer les tweets
-    tweets = api.recuperer_tweets(query = 'Coca Cola', count = 300)
+    tweets = api.recuperer_tweets(query = 'Obama', count = 300)
     # Récupération des tweets
     print('\x1b[6;30;42m' + "\n\nRécupération des tweets pour :" + '\x1b[0m')
     print("Enregistrement des tweets sur un fichier csv")
