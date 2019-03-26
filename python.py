@@ -1,19 +1,23 @@
 #CREPIN Paul William BI1 - P2020
 import tweepy #outils indispensable pour récupérer les tweets
-import re #expression régulière
 from tweepy import OAuthHandler
 from textblob import TextBlob #outils pour les sentiments
 import numpy as np # fonction mathématique
 import csv #Import csv
 import time #pour marquer des pauses dans le code
 import pandas as pd
+import re #expression régulière
+import collections
+import matplotlib.pyplot as plt
+from matplotlib import style, rcParams
+import string
 
 '''
 Pour réaliser ce Projet nous avons crée plusieurs fonction afin de permettre la récupération, le filtrage,
 ainsi que l'analyse de nos tweets en fonction d'un query déterminé en amon
 '''
 
-class TwitterClient(object):
+class TwitterProject(object):
 	# Script d'analyse des sentiments des tweets .
 
 	def __init__(self):
@@ -39,11 +43,11 @@ class TwitterClient(object):
 	def trouver_tweet_sentiment(self, tweet):
         # Pour réaliser cette fonction(sentiments) nous utilisons la fonction textblob
         # Cette fonction permet de classifier les tweets en fonction de keywords prédéfini dans une bibliothèque
-		analysis = TextBlob(self.clean_tweet(tweet))
+		analyse = TextBlob(self.clean_tweet(tweet))
 		# On analyse les sentiments
-		if analysis.sentiment.polarity > 0:
+		if analyse.sentiment.polarity > 0:
 			return "positive"
-		elif analysis.sentiment.polarity == 0:
+		elif analyse.sentiment.polarity == 0:
 			return "neutral"
 		else:
 			return "negative"
@@ -96,9 +100,9 @@ def main():
     # Utilisation de Csv Writer pour créer notre document
     csvWriter = csv.writer(csvFile)
 	# Création d'une classe twitter client
-    api = TwitterClient()
+    api = TwitterProject()
 	# On appelle une fonction pour récupérer les tweets
-    tweets = api.recuperer_tweets(query = 'Obama', count = 300)
+    tweets = api.recuperer_tweets(query = 'Donald Trump', count = 300)
     # Récupération des tweets
     print('\x1b[6;30;42m' + "\n\nRécupération des tweets pour :" + '\x1b[0m')
     print("Enregistrement des tweets sur un fichier csv")
@@ -118,9 +122,9 @@ def main():
     negative_tweets = [tweet for tweet in tweets if tweet['sentiment'] == 'negative']
 	# On calcul le pourcentage de tweet negatif
     print("\033[1;31m Negative tweets percentage: {} %".format(100*len(negative_tweets)/len(tweets)))
-	# percentage of neutral tweets
+	# Pourcentage de tweets neutres
     print("\033[1;37m Neutral tweets percentage: {} %".format(100*(len(tweets) - len(negative_tweets) - len(positive_tweets))/len(tweets)))
-	# On affiche les 5 premiers tweets positif
+	# On affiche les premiers tweets positif
     print('\x1b[1;30;42m' + "\n\nPositive tweets:" + '\x1b[0m')
     for tweet in positive_tweets[:15]:
         print(tweet['text'])
@@ -132,6 +136,36 @@ def main():
 # Fin du programme
     time.sleep(2)
     print("fin")
+    time.sleep(2)
+# Ouverture
+# On compte combien de fois chaque words à été utilisé
+text = open('database.csv').read()
+words = text.split()
+# On enlève toute la ponctuation
+table = str.maketrans('', '', string.punctuation)
+stripped = [w.translate(table) for w in words]
+print(stripped[:300])
+# Notre fichier de donnée est nettoyé de sorte à enlever la ponctuation
+output_file = open('databaseclean.csv', 'w')
+writer = csv.writer(output_file)
+writer.writerow(stripped)
+########################################################################
+word = text.split()
+word_count = {}
+for word in words:
+    count = word_count.get(word, 0)
+    count += 1
+    word_count[word] = count
+# On affiche ces words en colonne et dans un csv afin de pouvoir les récupérer par la suite
+word_count_list = sorted(word_count, key=word_count.get, reverse=True)
+for word in word_count_list[:20]:
+    print(stripped, word_count[word])
+output_file = open('Trie.csv', 'w')
+writer = csv.writer(output_file)
+writer.writerow(['word', 'count'])
+for word in word_count_list:
+    writer.writerow([word, word_count[word]])
+
 if __name__ == "__main__":
 	# On rapelle la fonction principale
     main()
