@@ -14,12 +14,11 @@ import string
 
 '''
 Pour réaliser ce Projet nous avons crée plusieurs fonction afin de permettre la récupération, le filtrage,
-ainsi que l'analyse de nos tweets en fonction d'un query déterminé en amon
+ainsi que l'analyse de nos tweets en fonction d'un query déterminé en amont
 '''
 
 class TwitterProject(object):
 	# Script d'analyse des sentiments des tweets .
-
 	def __init__(self):
         #initialisation du programme
 		# on identitie des clefs de l'api twitter
@@ -43,20 +42,25 @@ class TwitterProject(object):
 	def trouver_tweet_sentiment(self, tweet):
         # Pour réaliser cette fonction(sentiments) nous utilisons la fonction textblob
         # Cette fonction permet de classifier les tweets en fonction de keywords prédéfini dans une bibliothèque
-		analyse = TextBlob(self.clean_tweet(tweet))
+		analyse = TextBlob(self.tweet_cleaner(tweet))
 		# On analyse les sentiments
+		analyse.sentiment
+		print(analyse.sentiment)
+		#
 		if analyse.sentiment.polarity > 0:
 			return "positive"
+			# par rapport au fonctionnement de textblob
+			#si un tweet à une polarité inférieur ou supérieur à 0 son état change
 		elif analyse.sentiment.polarity == 0:
 			return "neutral"
 		else:
 			return "negative"
-#Fonction pour cleaner les tweet afin d'enlever les liens ainsi que les caractères spéciaux.
-	def clean_tweet(self, tweet):
-		return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", tweet).split())
+    # Fonction pour cleaner les tweet afin d'enlever les liens ainsi que les caractères spéciaux.
+	def tweet_cleaner(self, tweet):
+		return ' '.join(re.sub(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|RT|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', '', tweet).split())
 
 # On récupère une liste de tweet
-	def recuperer_tweets(self, query, count = 10):
+	def recuperer_les_tweets(self, query, count = 10):
 		'''
         Cette fonction permet parser les tweets, nous avons eu certaines difficulté pour implémenter cette fonction
         En raison d'une première utilisation du module tweepy
@@ -78,20 +82,21 @@ class TwitterProject(object):
 				# on enregistre le sentiment des tweets à partir de texteblob
 				parsed_tweet['sentiment'] = self.trouver_tweet_sentiment(tweet.text)
 
-				# appending parsed tweet to tweets list
+				# ajout du  tweet analysé à la liste twitter
 				if tweet.retweet_count > 0:
 					# Si les tweets on été retwitté on les mets dans une liste
 					if parsed_tweet not in tweets:
 						tweets.append(parsed_tweet)
 				else:
 					tweets.append(parsed_tweet)
+				#	Ajoute un élément à la fin de la liste.
 
 			# On retourne les tweets parcourus
 			return tweets
 
 		except tweepy.TweepError as e:
 			# Affichage d'une eventuelle erreur
-			print("Error : " + str(e))
+			print("ERREUR : " + str(e))
 
 def main():
 
@@ -102,7 +107,7 @@ def main():
 	# Création d'une classe twitter client
     api = TwitterProject()
 	# On appelle une fonction pour récupérer les tweets
-    tweets = api.recuperer_tweets(query = 'Donald Trump', count = 300)
+    tweets = api.recuperer_les_tweets(query = 'Donald Trump', count = 300)
     # Récupération des tweets
     print('\x1b[6;30;42m' + "\n\nRécupération des tweets pour :" + '\x1b[0m')
     print("Enregistrement des tweets sur un fichier csv")
@@ -144,27 +149,34 @@ words = text.split()
 # On enlève toute la ponctuation
 table = str.maketrans('', '', string.punctuation)
 stripped = [w.translate(table) for w in words]
-print(stripped[:300])
+print(stripped[:1000])
 # Notre fichier de donnée est nettoyé de sorte à enlever la ponctuation
 output_file = open('databaseclean.csv', 'w')
 writer = csv.writer(output_file)
 writer.writerow(stripped)
-########################################################################
-word = text.split()
+
+#######################################################################
+translator = str.maketrans('', '', string.punctuation)
 word_count = {}
+db = open('databaseclean.csv').read()
+words = text.split()
+
 for word in words:
+    word = word.translate(translator).lower()
     count = word_count.get(word, 0)
     count += 1
     word_count[word] = count
-# On affiche ces words en colonne et dans un csv afin de pouvoir les récupérer par la suite
+
 word_count_list = sorted(word_count, key=word_count.get, reverse=True)
 for word in word_count_list[:20]:
-    print(stripped, word_count[word])
-output_file = open('Trie.csv', 'w')
+    print(word, word_count[word])
+
+output_file = open('result.csv', 'w')
 writer = csv.writer(output_file)
 writer.writerow(['word', 'count'])
 for word in word_count_list:
     writer.writerow([word, word_count[word]])
+#######################################################################
 
 if __name__ == "__main__":
 	# On rapelle la fonction principale
