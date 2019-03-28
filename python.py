@@ -11,7 +11,10 @@ import collections
 import matplotlib.pyplot as plt
 from matplotlib import style, rcParams
 import string
-
+from subprocess import check_output
+from wordcloud import WordCloud, STOPWORDS
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 '''
 Pour réaliser ce Projet nous avons crée plusieurs fonction afin de permettre la récupération, le filtrage,
 ainsi que l'analyse de nos tweets en fonction d'un query déterminé en amont
@@ -142,42 +145,66 @@ def main():
     time.sleep(2)
     print("fin")
     time.sleep(2)
-# Ouverture
-# On compte combien de fois chaque words à été utilisé
-text = open('database.csv').read()
-words = text.split()
-# On enlève toute la ponctuation
-table = str.maketrans('', '', string.punctuation)
-stripped = [w.translate(table) for w in words]
-print(stripped[:1000])
-# Notre fichier de donnée est nettoyé de sorte à enlever la ponctuation
-output_file = open('databaseclean.csv', 'w')
-writer = csv.writer(output_file)
-writer.writerow(stripped)
+    # Ouverture
+    # On compte combien de fois chaque words à été utilisé
+    text = open('database.csv').read()
+    words = text.split()
+    # On enlève toute la ponctuation
+    table = str.maketrans('', '', string.punctuation)
+    stripped = [w.translate(table) for w in words]
+    print(stripped[:1000])
+    # Notre fichier de donnée est nettoyé de sorte à enlever la ponctuation
+    output_file = open('databaseclean.csv', 'w')
+    writer = csv.writer(output_file)
+    writer.writerow(stripped)
 
 #######################################################################
-translator = str.maketrans('', '', string.punctuation)
-word_count = {}
-db = open('databaseclean.csv').read()
-words = text.split()
+    translator = str.maketrans('', '', string.punctuation)
+    word_count = {}
+    db = open('databaseclean.csv').read()
+    words = text.split()
 
-for word in words:
-    word = word.translate(translator).lower()
-    count = word_count.get(word, 0)
-    count += 1
-    word_count[word] = count
+    for word in words:
+        word = word.translate(translator).lower()
+        count = word_count.get(word, 0)
+        count += 1
+        word_count[word] = count
 
-word_count_list = sorted(word_count, key=word_count.get, reverse=True)
-for word in word_count_list[:20]:
-    print(word, word_count[word])
+    word_count_list = sorted(word_count, key=word_count.get, reverse=True)
+    for word in word_count_list[:20]:
+        print(word, word_count[word])
 
-output_file = open('result.csv', 'w')
-writer = csv.writer(output_file)
-writer.writerow(['word', 'count'])
-for word in word_count_list:
-    writer.writerow([word, word_count[word]])
+    output_file = open('result.csv', 'w')
+    writer = csv.writer(output_file)
+    writer.writerow(['word', 'count'])
+    for word in word_count_list:
+        writer.writerow([word, word_count[word]])
+
 #######################################################################
+    mpl.rcParams['font.size']=12                #10
+    mpl.rcParams['savefig.dpi']=100             #72
+    mpl.rcParams['figure.subplot.bottom']=.1
+#Utilisation de Wordcloud qui permet de générer un visuel en fonction de tout
+# les mots trouvé.
+    stopwords = set(STOPWORDS)
+    data = pd.read_csv("result.csv")
 
+    wordcloud = WordCloud(
+                              background_color='white',
+                              stopwords=stopwords,
+                              max_words=200,
+                              max_font_size=40,
+                              random_state=42
+                             ).generate(str(data['word']))
+
+    print(wordcloud) #affichage
+    fig = plt.figure(1)
+    plt.imshow(wordcloud)  #affichage
+    plt.axis('off')  #affichage
+    plt.show()  #affichage
+    fig.savefig("word1.png", dpi=900)  #affichage
+
+#######################################################################
 if __name__ == "__main__":
 	# On rapelle la fonction principale
     main()
