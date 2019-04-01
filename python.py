@@ -11,7 +11,6 @@ import collections
 import matplotlib.pyplot as plt
 from matplotlib import style, rcParams
 import string
-from subprocess import check_output
 from wordcloud import WordCloud, STOPWORDS
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -38,6 +37,8 @@ class TwitterProject(object):
 			self.auth.set_access_token(access_token_twitter, access_token_secret_twitter)
             # On crée une tweepy API pour récupérer les tweets
 			self.api = tweepy.API(self.auth)
+			print("Connexion successful")
+			time.sleep(1)
 		except:
             # Erreur
 			print("Erreur : La connexion à échouée")
@@ -203,7 +204,6 @@ def main():
     plt.axis('off')  #affichage
     plt.show()  #affichage
     fig.savefig("word1.png", dpi=900)  #affichage
-
 #######################################################################
 if __name__ == "__main__":
 	# On rapelle la fonction principale
