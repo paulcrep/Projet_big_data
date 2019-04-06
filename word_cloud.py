@@ -1,11 +1,11 @@
 #CREPIN Paul William BI1 - Timothée Marguier P2020
 import numpy as np # linear algebra
-import pandas as pd
+import pandas as pd # lire csv
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from os import path
 from PIL import Image
-from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator #wordcloud
 from subprocess import check_output
 
 mpl.rcParams['font.size']=12                #10
@@ -31,4 +31,5 @@ plt.axis("off")
 # On enregistre l'image
 plt.savefig("us.png", format="png")
 
+#affichage de l'analyse
 plt.show()
